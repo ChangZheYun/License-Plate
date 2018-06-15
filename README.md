@@ -1,1 +1,1 @@
-"License-Plate" 
+License-Plate
