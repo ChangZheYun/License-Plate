@@ -9,7 +9,7 @@ import numpy as np
 import cv2
 
 def h_v_project(name):     #h水平、v垂直
-   hsl_pic=cv2.imread('Pre-processing/'+name)
+   hsl_pic=cv2.imread(name)
    th = cv2.cvtColor(hsl_pic, cv2.COLOR_BGR2GRAY)
    h_num=np.zeros(300,dtype=int)   #統計水平白點數量
    v_num=np.zeros(500,dtype=int)   #統計垂直白點數量
@@ -35,24 +35,42 @@ def h_v_project(name):     #h水平、v垂直
  #  cv2.imshow('horizan',horizan)
  #  cv2.imshow('vertical',vertical)
 
-def check_rectangle(name,x,y,w,h):
-   adaptive=cv2.imread('Pre-processing/'+name+'-adpative.jpg') #存成圖片會變成RGB
-   #origin_img = cv2.rectangle(origin_img, (x, y), (x+w, y+h), (255, 0, 0), 2)
-   count_x=0
-   count_y=0
-   for i in range(y,y+5):
-      for j in range(x,x+w):
-         if (adaptive[i][j]==[255,255,255]).any():
-            count_x+=1
-   for i in range(x,x+5):
-      for j in range(y,y+h):
-         if (adaptive[j][i]==[255,255,255]).any():
-            count_y+=1
-   print(count_x,",",count_y)
-   if count_x>=500 or count_y>=500:
-      return 0
+def check_rectangle(mode,gray,dilation,x,y,w,h):
+   check_color=0.0
+   index=0.0
+   ascent=0
+   segment=np.zeros([2,len(gray[0])])
+   
+   if mode==1:
+      standard=150
    else:
-      return 1
- 
+      standard=20
+      
+   for i in range(len(dilation)):
+      for j in range(len(dilation[0])):
+         if dilation[i][j]==0:
+            check_color+=1
+         if gray[i][j]<standard:
+            segment[0][j]+=1
+         index+=1
+  # print("answer ",check_color/index*100)
+
+   if (check_color/index*100)<25: #黑色區域佔25%以下淘汰
+      return False
+   else:
+      #往上=>1,往下=>0
+      for i in range(0,len(gray[0])-1):
+         if segment[0][i]>segment[0][i+1]:
+            segment[1][i]=0
+         elif segment[0][i]<segment[0][i+1] and (segment[0][i+1]-segment[0][i])>=5:
+            segment[1][i]=1
+            ascent+=1
+      #print(segment)
+      if ascent>=12:
+      #   print(segment)
+         return True
+      else:
+         return False
+
 cv2.waitKey(0)
 cv2.destroyAllWindows()
