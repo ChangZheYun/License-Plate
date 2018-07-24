@@ -34,7 +34,7 @@ def L_threshold(origin_pic): #找出圖片HSL的L門檻值
    
    for i in range(255,0,-1):
        L_num[256]+=L_num[i]
-       if L_num[256]>=40000:
+       if L_num[256]>=30000:
            index=i
            break
        
